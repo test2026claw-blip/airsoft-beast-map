@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TACTICAL ARMORY // AIRSOFT BEAST HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tactical-amber: #f59e0b;
+            --dark-ops: #020617;
+        }
+        body {
+            background-color: var(--dark-ops);
+            color: #f8fafc;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .font-header { font-family: 'Syncopate', sans-serif; }
+        .shop-card {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .shop-card:hover {
+            border-color: var(--tactical-amber);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+        }
+        .bg-grid {
+            background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-12 bg-grid min-h-screen">
+    <header class="max-w-6xl mx-auto mb-16 border-b border-amber-900/30 pb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-6">
+            <img src="logo.jpg" alt="Airsoft Beast Team" class="w-20 h-20 rounded-lg border border-amber-500/30">
+            <div>
+                <h1 class="font-header text-3xl md:text-4xl text-amber-500">TACTICAL ARMORY</h1>
+                <p class="text-xs uppercase tracking-widest text-zinc-500 mt-2">Strategic Logistics // Gear & Supply // 2026</p>
+            </div>
+        </div>
+        <a href="index.html" class="px-6 py-2 border border-zinc-700 hover:border-white text-xs font-bold uppercase transition-all rounded">← Back to Map</a>
+    </header>
+
+    <main class="max-w-6xl mx-auto space-y-12">
+        <!-- Irish Sector -->
+        <section>
+            <h3 class="text-xs font-bold text-amber-600 mb-6 uppercase tracking-[0.3em] border-l-2 border-amber-600 pl-4">Irish Supply Nodes</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="https://hobbyairsoft.ie/" target="_blank" class="shop-card p-8 rounded-xl flex flex-col items-center text-center">
+                    <div class="text-xs font-bold mb-2">HOBBY AIRSOFT</div>
+                    <p class="text-[10px] text-zinc-500 leading-relaxed">Dublin base. Great for starters and consumables.</p>
+                </a>
+                <a href="https://airsofteire.com/" target="_blank" class="shop-card p-8 rounded-xl flex flex-col items-center text-center">
+                    <div class="text-xs font-bold mb-2">AIRSOFT EIRE</div>
+                    <p class="text-[10px] text-zinc-500 leading-relaxed">Extensive catalogue of rifles and tactical gear.</p>
+                </a>
+                <a href="https://www.skirmshop.co.uk/" target="_blank" class="shop-card p-8 rounded-xl flex flex-col items-center text-center">
+                    <div class="text-xs font-bold mb-2">SKIRMSHOP</div>
+                    <p class="text-[10px] text-zinc-500 leading-relaxed">The precision tuning specialists for IE/UK.</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- EU Sector -->
+        <section>
+            <h3 class="text-xs font-bold text-zinc-500 mb-6 uppercase tracking-[0.3em] border-l-2 border-zinc-700 pl-4">EU Strategic Logistics</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="https://www.novritsch.com/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">NOVRITSCH</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">Premium Sniper/Gear</span>
+                </a>
+                <a href="https://gunfire.com/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">GUNFIRE</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">Poland // Massive Stock</span>
+                </a>
+                <a href="https://www.taiwangun.com/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">TAIWANGUN</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">Best Budget/Mid Performance</span>
+                </a>
+                <a href="https://www.powair6.com/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">POWAIR6</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">France // HPA Specialist</span>
+                </a>
+                <a href="https://airsoftpro.cz/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">AIRSOFTPRO</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">Czech // Hardcore Parts</span>
+                </a>
+                <a href="https://evike-europe.com/" target="_blank" class="shop-card p-6 rounded flex justify-between items-center group">
+                    <span class="text-xs font-bold group-hover:text-amber-400">EVIKE EUROPE</span>
+                    <span class="text-[9px] text-zinc-600 uppercase">Global Giant // EU Node</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-6xl mx-auto mt-20 pt-8 border-t border-zinc-900 text-[9px] text-zinc-700 flex justify-between uppercase font-bold">
+        <span>© 2026 Skynet Logistics</span>
+        <span>Secure Supply Link: Active</span>
+    </footer>
+</body>
+</html>
