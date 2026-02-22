@@ -54,6 +54,29 @@
         .status-ready { color: #4ade80; border: 1px solid #4ade80; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
         .status-caution { color: #fbbf24; border: 1px solid #fbbf24; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
         .status-abort { color: #f87171; border: 1px solid #f87171; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
+
+        /* Premium Gold Button Style */
+        .btn-gold-premium {
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            background-size: 400% 400%;
+            color: #000 !important;
+            font-weight: 900 !important;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+            border: 1px solid #8a6d3b !important;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.4), inset 0 0 5px rgba(255,255,255,0.5);
+            animation: gold-shimmer 5s ease infinite;
+            letter-spacing: 1px;
+        }
+        @keyframes gold-shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-gold-premium:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            filter: brightness(1.1);
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -78,7 +101,7 @@
                 <h3 class="text-xs font-bold text-amber-500 border-b border-amber-900/20 pb-2 uppercase tracking-tighter">Quick Deploy</h3>
                 <div class="grid grid-cols-1 gap-2">
                     <a href="https://www.specialops.ie/activity/airsoft-walk-on/" target="_blank" class="bg-yellow-600/20 border border-yellow-500/30 text-yellow-500 p-2 text-center font-bold hover:bg-yellow-500 hover:text-black transition-all text-[9px] rounded">SPEC OPS STANDARD</a>
-                    <a href="https://www.specialops.ie/gold-member-login/" target="_blank" class="bg-yellow-400/20 border border-yellow-400/50 text-yellow-400 p-2 text-center font-bold hover:bg-yellow-400 hover:text-black transition-all text-[9px] rounded">SPEC OPS GOLDEN</a>
+                    <a href="https://www.specialops.ie/gold-member-login/" target="_blank" class="btn-gold-premium p-2 text-center text-[9px] rounded transition-all">SPEC OPS GOLDEN MEMBER</a>
                     <a href="https://urbanassault.ie/play-airsoft/" target="_blank" class="bg-cyan-900/20 border border-cyan-500/30 text-cyan-400 p-2 text-center font-bold hover:bg-cyan-500 hover:text-black transition-all text-[9px] rounded">URBAN ASSAULT</a>
                 </div>
             </div>
@@ -248,7 +271,7 @@
                         ${site.id === 'specops' ? `
                         <div class="grid grid-cols-2 gap-2">
                             <a href="https://www.specialops.ie/activity/airsoft-walk-on/" target="_blank" class="bg-yellow-600/20 border border-yellow-500/30 text-yellow-500 p-2 text-center font-bold hover:bg-yellow-500 hover:text-black transition-all text-[8px]">SPEC OPS STANDARD</a>
-                            <a href="https://www.specialops.ie/gold-member-login/" target="_blank" class="bg-yellow-400/20 border border-yellow-400/50 text-yellow-400 p-2 text-center font-bold hover:bg-yellow-400 hover:text-black transition-all text-[8px]">SPEC OPS GOLDEN</a>
+                            <a href="https://www.specialops.ie/gold-member-login/" target="_blank" class="btn-gold-premium p-2 text-center font-bold transition-all text-[8px]">SPEC OPS GOLDEN</a>
                         </div>
                         ` : ''}
                         
