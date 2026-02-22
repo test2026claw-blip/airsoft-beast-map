@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIRSOFT BEAST HUB // IRELAND TACTICAL HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tactical-green: #4ade80;
+            --dark-ops: #020617;
+        }
+        body {
+            background-color: var(--dark-ops);
+            color: #f8fafc;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        #map { height: 500px; width: 100%; border: 1px solid #1e293b; border-radius: 8px; }
+        .leaflet-container { background: #020617 !important; }
+        .font-header { font-family: 'Syncopate', sans-serif; }
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #4ade80;
+            border-radius: 4px;
+        }
+        .custom-popup .leaflet-popup-tip { background: #4ade80; }
+        .event-card { border-left: 2px solid var(--tactical-green); }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .weather-badge {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            color: #4ade80;
+        }
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .forecast-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 8px;
+        }
+        .status-ready { color: #4ade80; border: 1px solid #4ade80; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
+        .status-caution { color: #fbbf24; border: 1px solid #fbbf24; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
+        .status-abort { color: #f87171; border: 1px solid #f87171; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <header class="mb-8 border-b border-green-900/30 pb-6 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-6">
+            <img src="logo.jpg" alt="Airsoft Beast Team" class="w-20 h-20 md:w-24 md:h-24 rounded-lg border border-green-500/30 shadow-lg shadow-green-900/20">
+            <div>
+                <h1 class="font-header text-3xl md:text-4xl text-green-400">AIRSOFT BEAST HUB</h1>
+                <p class="text-xs uppercase tracking-widest text-zinc-500 mt-2">Ireland Ops // Active Fields // Intel Feed 2026</p>
+            </div>
+        </div>
+        <div class="text-[10px] text-zinc-600 font-bold uppercase text-right">
+            <div>Uplink: Secure</div>
+            <div id="global-weather" class="text-green-600">Loading Weather...</div>
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left: Site Intel -->
+        <div class="lg:col-span-3 space-y-6 overflow-y-auto max-h-[800px] pr-2 scroll-hide">
+            <h3 class="text-xs font-bold text-green-500 border-b border-green-900/20 pb-2 uppercase tracking-tighter">Tactical Briefing</h3>
+            <div id="site-list" class="space-y-3">
+                <!-- List populated by JS -->
+            </div>
+        </div>
+
+        <!-- Center: Strategic Map -->
+        <div class="lg:col-span-6 space-y-6">
+            <div id="map"></div>
+            
+            <div class="p-4 bg-slate-900/30 border border-slate-800 rounded">
+                <h3 class="text-xs font-bold text-zinc-400 mb-4 uppercase tracking-widest">Selected Site Intel</h3>
+                <div id="details-panel" class="text-[11px] text-zinc-500 italic">
+                    Select a location on the map or list to view detailed intel and booking data.
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Operational Calendar -->
+        <div class="lg:col-span-3 space-y-6">
+            <h3 class="text-xs font-bold text-amber-500 border-b border-amber-900/20 pb-2 uppercase tracking-tighter">Op Calendar</h3>
+            <div id="event-feed" class="space-y-4">
+                <!-- Events populated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-8 pt-4 border-t border-green-900/20 text-[9px] text-zinc-700 flex justify-between uppercase font-bold">
+        <span>© 2026 Skynet Tactical Systems</span>
+        <span>Secure Data Link Enabled // Dublin Node</span>
+    </footer>
+
+    <script>
+        const airsoftSites = [
+            {
+                id: "specops",
+                name: "Special Ops Airsoft",
+                coords: [53.0889, -6.1944],
+                location: "Roundwood, Wicklow",
+                website: "https://www.specialops.ie/",
+                booking: "https://www.specialops.ie/activity/airsoft-walk-on/",
+                desc: "Forest & Trench warfare. Known for intense realism and night ops.",
+                type: "Outdoors",
+                events: [
+                    { name: "Weekend Walk-on", day: "Sat & Sun", time: "09:30 - 16:30" },
+                    { name: "Night Ops", day: "Select Fri", time: "18:30 - 00:00" }
+                ]
+            },
+            {
+                id: "urbanassault",
+                name: "Urban Assault",
+                coords: [53.7833, -6.4833],
+                location: "Collon, Co. Louth",
+                website: "https://www.urbanassault.ie/",
+                booking: "https://urbanassault.ie/play-airsoft/",
+                desc: "Multi-terrain venue with CQB buildings and dense forest battlegrounds.",
+                type: "Multi-Terrain",
+                events: [
+                    { name: "Weekend War", day: "Sat & Sun", time: "10:00 - 16:00" }
+                ]
+            },
+            {
+                id: "fingal",
+                name: "Fingal Airsoft",
+                coords: [53.6272, -6.2618],
+                location: "Stamullen, Meath",
+                website: "https://fingalairsoft.com/",
+                booking: "https://fingalairsoft.com/contact-us/",
+                desc: "One of the longest running sites. Varied terrain with CQB elements.",
+                type: "Outdoors",
+                events: [
+                    { name: "Weekend Skirmish", day: "Sat & Sun", time: "09:30 - 16:30" }
+                ]
+            },
+            {
+                id: "redhills",
+                name: "Redhills Adventure",
+                coords: [53.1815, -6.9325],
+                location: "Redhills, Kildare",
+                website: "https://redhillsadventure.ie/",
+                booking: "https://redhillsadventure.ie/activities/airsoft/",
+                desc: "Large scale field with multiple game modes. High tactical focus.",
+                type: "Outdoors",
+                events: [
+                    { name: "Sat Morning Op", day: "Saturday", time: "10:00 - 13:00" },
+                    { name: "Sun Morning Op", day: "Sunday", time: "10:00 - 13:00" }
+                ]
+            },
+            {
+                id: "hive",
+                name: "The Hive Airsoft",
+                coords: [53.3931, -6.1916],
+                location: "Coolock, Dublin",
+                website: "https://www.facebook.com/TheHiveAirsoft/",
+                booking: "https://www.facebook.com/TheHiveAirsoft/",
+                desc: "Premier Indoor CQB site. Intense close quarters combat.",
+                type: "Indoor/CQB",
+                events: [
+                    { name: "Midweek CQB", day: "Wed & Thu", time: "18:00 - 22:00" },
+                    { name: "Weekend Blitz", day: "Sat & Sun", time: "Varies" }
+                ]
+            },
+            {
+                id: "bellurgan",
+                name: "Bellurgan Park",
+                coords: [54.0225, -6.3158],
+                location: "Dundalk, Louth",
+                website: "https://bellurganpark.ie/",
+                booking: "https://bellurganpark.ie/contact-us/",
+                desc: "Massive estate. Host to major MilSim events across Ireland.",
+                type: "Milsim",
+                events: [
+                    { name: "Monthly Skirmish", day: "Check Socials", time: "Full Day" }
+                ]
+            },
+            {
+                id: "blackops",
+                name: "Black Ops Airsoft",
+                coords: [52.1385, -8.6425],
+                location: "Mallow, Cork",
+                website: "https://www.facebook.com/BlackOpsAirsoftIreland/",
+                booking: "https://www.facebook.com/BlackOpsAirsoftIreland/",
+                desc: "Cork's primary destination. Varied field designs and woodland combat.",
+                type: "Outdoors",
+                events: [
+                    { name: "Weekend Skirmish", day: "Sat & Sun", time: "10:00 - 16:00" }
+                ]
+            }
+        ];
+
+        // Initialize Map
+        const map = L.map('map', { zoomControl: false }).setView([53.4, -7.8], 7);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' }).addTo(map);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        const siteList = document.getElementById('site-list');
+        const eventFeed = document.getElementById('event-feed');
+        const detailsPanel = document.getElementById('details-panel');
+
+        function updateDetails(site, weatherHtml = '', forecastHtml = '') {
+            detailsPanel.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-green-400 font-bold text-sm">${site.name}</h4>
+                        <div class="flex flex-col items-end gap-1">
+                            <a href="${site.website}" target="_blank" class="text-[9px] bg-zinc-800 px-2 py-1 hover:text-white transition-colors underline">Official Site</a>
+                            ${weatherHtml}
+                        </div>
+                    </div>
+                    <p class="text-zinc-300 text-[10px] leading-relaxed">${site.desc}</p>
+                    <div class="bg-black/20 p-3 rounded">
+                        <h5 class="text-[9px] font-bold text-amber-500 uppercase mb-2 italic tracking-widest">Tactical Weather Briefing</h5>
+                        ${forecastHtml}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${site.coords[0]},${site.coords[1]}" target="_blank" class="bg-green-900/20 border border-green-500/30 text-green-400 p-2 text-center font-bold hover:bg-green-500 hover:text-black transition-all text-[9px]">ROUTE</a>
+                        <a href="${site.booking}" target="_blank" class="bg-amber-900/20 border border-amber-500/30 text-amber-400 p-2 text-center font-bold hover:bg-amber-500 hover:text-black transition-all text-[9px]">BOOK NOW</a>
+                        <a href="https://www.yr.no/en/search?q=${encodeURIComponent(site.location.split(',')[0])}" target="_blank" class="bg-blue-900/20 border border-blue-500/30 text-blue-400 p-2 text-center font-bold hover:bg-blue-500 hover:text-black transition-all text-[9px]">YR.NO (PRECISION)</a>
+                        <a href="https://www.windy.com/${site.coords[0]}/${site.coords[1]}?${site.coords[0]},${site.coords[1]},12" target="_blank" class="bg-red-900/20 border border-red-500/30 text-red-400 p-2 text-center font-bold hover:bg-red-500 hover:text-black transition-all text-[9px]">WINDY RADAR</a>
+                        <a href="https://www.met.ie/latest-reports/recent-rainfall-radar/12-hour-rainfall-radar" target="_blank" class="bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 p-2 text-center font-bold hover:bg-emerald-500 hover:text-black transition-all text-[9px] col-span-2">MET ÉIREANN LIVE RADAR</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function getSiteWeather(lat, lon) {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,precipitation_probability&forecast_days=10`);
+                const data = await res.json();
+                return data;
+            } catch (e) { return null; }
+        }
+
+        function getBadge(rainProb) {
+            if (rainProb < 20) return '<span class="status-ready">🟢 GO: READY</span>';
+            if (rainProb < 50) return '<span class="status-caution">🟡 CAUTION</span>';
+            return '<span class="status-abort">🔴 ABORT</span>';
+        }
+
+        function buildForecastHtml(data) {
+            if (!data || !data.hourly) return '<p class="text-[8px] text-zinc-600 italic">Forecast Unavailable</p>';
+            
+            const now = new Date();
+            const daysToSat = (6 - now.getDay() + 7) % 7;
+            const satDate = new Date();
+            satDate.setDate(now.getDate() + (daysToSat === 0 && now.getHours() > 18 ? 7 : daysToSat));
+            const sunDate = new Date(satDate);
+            sunDate.setDate(satDate.getDate() + 1);
+
+            const formatLocal = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const satStr = formatLocal(satDate);
+            const sunStr = formatLocal(sunDate);
+
+            const renderDay = (label, dateStr) => {
+                let dayMaxRain = 0;
+                let dayGridHtml = '';
+                for (let i = 0; i < data.hourly.time.length; i++) {
+                    const time = data.hourly.time[i];
+                    if (time.startsWith(dateStr)) {
+                        const hour = parseInt(time.split('T')[1].split(':')[0]);
+                        if (hour >= 10 && hour <= 16 && hour % 2 === 0) {
+                            const temp = data.hourly.temperature_2m[i];
+                            const rain = data.hourly.precipitation_probability[i];
+                            if (rain > dayMaxRain) dayMaxRain = rain;
+                            dayGridHtml += `<div class="forecast-item">
+                                <div class="text-zinc-500">${hour}:00</div>
+                                <div class="text-white font-bold">${temp}°</div>
+                                <div class="${rain > 30 ? 'text-blue-400 font-bold' : 'text-zinc-600'}">${rain}% 💧</div>
+                            </div>`;
+                        }
+                    }
+                }
+                
+                return `
+                    <div class="mb-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">${label} (${dateStr})</span>
+                            ${getBadge(dayMaxRain)}
+                        </div>
+                        <div class="forecast-grid">${dayGridHtml}</div>
+                    </div>`;
+            };
+
+            return renderDay('SATURDAY', satStr) + renderDay('SUNDAY', sunStr);
+        }
+
+        airsoftSites.forEach(async site => {
+            const weatherData = await getSiteWeather(site.coords[0], site.coords[1]);
+            const current = weatherData ? weatherData.current_weather : null;
+            const weatherText = current ? `${current.temperature}°C` : 'Offline';
+            const weatherHtml = current ? `<span class="weather-badge">${current.temperature}°C // WIND: ${current.windspeed}km/h</span>` : '';
+            const forecastHtml = buildForecastHtml(weatherData);
+
+            // Marker
+            const marker = L.marker(site.coords).addTo(map);
+            marker.bindTooltip(`${site.name} [${weatherText}]`, { permanent: false, direction: 'top', className: 'tactical-tooltip' });
+            marker.on('click', () => {
+                map.flyTo(site.coords, 12);
+                updateDetails(site, weatherHtml, forecastHtml);
+            });
+
+            // Sidebar Item
+            const item = document.createElement('div');
+            item.className = 'p-3 bg-slate-900/50 border border-slate-800 rounded hover:border-green-500 cursor-pointer transition-colors group';
+            item.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="text-xs font-bold text-zinc-300 group-hover:text-white">${site.name}</h4>
+                    <span class="text-[8px] bg-green-900/30 text-green-500 px-1 border border-green-500/20">${site.type}</span>
+                </div>
+                <div class="flex justify-between items-center mt-2">
+                    <p class="text-[9px] text-zinc-500">${site.location}</p>
+                    ${weatherHtml}
+                </div>
+            `;
+            item.onclick = () => {
+                map.flyTo(site.coords, 12);
+                updateDetails(site, weatherHtml, forecastHtml);
+            };
+            siteList.appendChild(item);
+
+            // Event Feed
+            site.events.forEach(evt => {
+                const evCard = document.createElement('div');
+                evCard.className = 'p-3 bg-zinc-900/40 event-card';
+                evCard.innerHTML = `
+                    <div class="text-[10px] font-bold text-zinc-200">${evt.name}</div>
+                    <div class="text-[9px] text-green-600 mt-1">${site.name}</div>
+                    <div class="flex justify-between text-[8px] text-zinc-500 mt-2 uppercase">
+                        <span>${evt.day}</span>
+                        <span>${evt.time}</span>
+                    </div>
+                `;
+                eventFeed.appendChild(evCard);
+            });
+        });
+
+        // Simple Global Weather Uplink (Dublin)
+        async function fetchGlobalWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=53.3498&longitude=-6.2603&current_weather=true');
+                const data = await res.json();
+                document.getElementById('global-weather').innerText = `DUB BASE: ${data.current_weather.temperature}°C // WIND: ${data.current_weather.windspeed}km/h`;
+            } catch (e) {
+                document.getElementById('global-weather').innerText = `Weather Offline`;
+            }
+        }
+        fetchGlobalWeather();
+    </script>
+</body>
+</html>
